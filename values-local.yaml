@@ -1,0 +1,57 @@
+prometheus:
+  alertmanager:
+    enabled: false
+  nodeExporter:
+    enabled: false
+  server:
+    global:
+      external_labels:
+        env: local
+    retention: "7d"
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - prometheus.local
+    extraArgs:
+      storage.tsdb.min-block-duration: 2h
+      storage.tsdb.max-block-duration: 2h
+  serverFiles:
+    blackbox.yaml:
+      - targets:
+          - 'https://speed.hetzner.de/100MB.bin'
+  extraScrapeConfigs: |
+    - job_name: argocd-server-metrics
+      static_configs:
+        - targets: ['argocd-application-controller-metrics.argocd:8082']
+      scheme: http
+    - job_name: 'blackbox'
+      scrape_interval: 30m
+      scrape_timeout: 10m
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      file_sd_configs:
+        - files:
+          - '/etc/config/blackbox.yaml'
+      relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: prometheus-blackbox-exporter:9115
+    - job_name: 'blackbox-icmp'
+      metrics_path: /probe
+      params:
+        module: [icmp]
+      static_configs:
+        - targets:
+          - google.com
+      relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: prometheus-blackbox-exporter:9115

@@ -1,0 +1,95 @@
+prometheus:
+  serviceAccounts:
+    alertmanager:
+      create: false
+  alertmanager:
+    enabled: false
+  configmapReload:
+    prometheus:
+      enabled: true
+      name: configmap-reload
+    resources:
+      limits:
+        cpu: 100m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  server:
+    enabled: true
+    name: server
+    strategy:
+      type: Recreate
+    resources:
+      limits:
+        cpu: 200m
+        memory: 50Mi
+      requests:
+        cpu: 100m
+        memory: 30Mi
+
+    enableServiceLinks: true
+
+    extraFlags:
+      - web.enable-lifecycle
+      # - web.enable-admin-api
+      # - storage.tsdb.no-lockfile
+      # - storage.tsdb.wal-compression
+
+    configPath: /etc/config/prometheus.yml
+
+    global:
+      scrape_interval: 30s
+      scrape_timeout: 10s
+      evaluation_interval: 1m
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    podDisruptionBudget:
+      enabled: false
+      maxUnavailable: 1
+    persistentVolume:
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      mountPath: /data
+      size: 20Gi
+    replicaCount: 1
+    statefulSet:
+      enabled: false
+      podManagementPolicy: OrderedReady
+      headless:
+        servicePort: 80
+    readinessProbeInitialDelay: 30
+    readinessProbePeriodSeconds: 5
+    readinessProbeTimeout: 4
+    readinessProbeFailureThreshold: 3
+    readinessProbeSuccessThreshold: 1
+    livenessProbeInitialDelay: 30
+    livenessProbePeriodSeconds: 15
+    livenessProbeTimeout: 10
+    livenessProbeFailureThreshold: 3
+    livenessProbeSuccessThreshold: 1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    dnsPolicy: ClusterFirst
+    service:
+      gRPC:
+        enabled: true
+        servicePort: 10901
+      statefulsetReplica:
+        enabled: false
+        replica: 0
+    terminationGracePeriodSeconds: 300
+    retention: "7d"
+  pushgateway:
+    enabled: false
+    name: pushgateway
