@@ -16,6 +16,7 @@ prometheus:
       hosts:
         - prometheus.local
     service:
+      type: NodePort
       nodePort: 30444
     extraArgs:
       storage.tsdb.min-block-duration: 2h
