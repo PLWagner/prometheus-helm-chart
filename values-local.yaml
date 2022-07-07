@@ -11,7 +11,7 @@ prometheus:
         env: local
     retention: "7d"
     ingress:
-      enabled: true
+      enabled: false
       ingressClassName: nginx
       hosts:
         - prometheus.local
