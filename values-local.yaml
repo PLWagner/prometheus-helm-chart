@@ -24,14 +24,14 @@ prometheus:
   serverFiles:
     blackbox.yaml:
       - targets:
-        - 'https://releases.ubuntu.com/22.04/ubuntu-22.04-live-server-amd64.iso'
+        - 'https://speed.hetzner.de/100MB.bin'
   extraScrapeConfigs: |
     - job_name: argocd-server-metrics
       static_configs:
         - targets: ['argocd-application-controller-metrics.argocd:8082']
       scheme: http
     - job_name: 'blackbox'
-      scrape_interval: 60m
+      scrape_interval: 15m
       scrape_timeout: 10m
       metrics_path: /probe
       params:
