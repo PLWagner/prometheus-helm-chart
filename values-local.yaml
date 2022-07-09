@@ -25,6 +25,7 @@ prometheus:
     blackbox.yaml:
       - targets:
         - 'https://speed.hetzner.de/100MB.bin'
+        - 'https://speed.hetzner.de/1GB.bin'
   extraScrapeConfigs: |
     - job_name: argocd-server-metrics
       static_configs:
